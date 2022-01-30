@@ -34,10 +34,10 @@ bool skysaCompatibility = false;
 std::string rightHand = "player.pa ActionRightPowerAttack";
 std::string leftHand = "player.pa ActionLeftPowerAttack";
 std::string dualWield = "player.pa ActionDualPowerAttack";
-std::string skysaCommandL = "player.playidle LeftHandPowerAttackForward";
+/*std::string skysaCommandL = "player.playidle LeftHandPowerAttackForward";
 std::string skysaCommandR = "player.playidle PowerAttackForward";
 std::string skysaCommandLStanding = "player.playidle LeftHandPowerAttack";
-std::string skysaCommandRStanding = "player.playidle PowerAttackStanding";
+std::string skysaCommandRStanding = "player.playidle PowerAttackStanding";*/
 bool isAttacking = false;
 
 /*RelocAddr<uintptr_t> AttackStopHandler_vtable(0x1671F30);
@@ -200,8 +200,13 @@ void LeftHandPowerAttack() {
 		SendConsoleCommand(leftHand);
 	}
 	else {
-		SendConsoleCommand(skysaCommandL);
-		SendConsoleCommand(skysaCommandLStanding);
+		//if (!isAttacking) {
+			SendConsoleCommand(rightHand);
+		/*}
+		else {
+			SendConsoleCommand(skysaCommandR);
+			SendConsoleCommand(skysaCommandRStanding);
+		}*/
 	}
 }
 
@@ -210,13 +215,13 @@ void DualWieldPowerAttack() {
 		SendConsoleCommand(dualWield);
 	}
 	else {
-		if (!isAttacking) {
-			SendConsoleCommand(dualWield);
-		}
+		//if (!isAttacking) {
+			SendConsoleCommand(rightHand);
+			/*}
 		else {
 			SendConsoleCommand(skysaCommandR);
 			SendConsoleCommand(skysaCommandRStanding);
-		}
+			}*/
 	}
 }
 
@@ -225,8 +230,13 @@ void RightHandPowerAttack() {
 		SendConsoleCommand(rightHand);
 	}
 	else {
-		SendConsoleCommand(skysaCommandR);
-		SendConsoleCommand(skysaCommandRStanding);
+		//if (!isAttacking) {
+			SendConsoleCommand(rightHand);
+			/*}
+		else {
+			SendConsoleCommand(skysaCommandR);
+			SendConsoleCommand(skysaCommandRStanding);
+			}*/
 	}
 }
 
@@ -284,10 +294,27 @@ public:
 	std::uint32_t meleeAttackState : 4;  // 0:28
 };
 
+BSFixedString inventoryMenu = BSFixedString("InventoryMenu");
 BSFixedString dialogueMenu = BSFixedString("Dialogue Menu");
+BSFixedString magicMenu = BSFixedString("MagicMenu");
+BSFixedString tweenMenu = BSFixedString("TweenMenu");
+BSFixedString barterMenu = BSFixedString("BarterMenu");
+BSFixedString giftMenu = BSFixedString("GiftMenu");
+BSFixedString lockpickingMenu = BSFixedString("Lockpicking Menu");
+BSFixedString journalMenu = BSFixedString("Journal Menu");
+BSFixedString levelUpMenu = BSFixedString("LevelUp Menu");
+BSFixedString bookMenu = BSFixedString("Book Menu");
+BSFixedString favoritesMenu = BSFixedString("FavoritesMenu");
+BSFixedString modManagerMenu = BSFixedString("Mod Manager Menu");
+BSFixedString sleepWaitMenu = BSFixedString("Sleep/Wait Menu");
+BSFixedString containerMenu = BSFixedString("ContainerMenu");
+BSFixedString statsMenu = BSFixedString("StatsMenu");
+BSFixedString quantityMenu = BSFixedString("Quantity Menu");
 class InputEventHandler : public BSTEventSink <InputEvent> {
 public:
-	virtual EventResult ReceiveEvent(InputEvent** evns, InputEventDispatcher* dispatcher) {
+	virtual EventResult ReceiveEvent(InputEvent** evns, InputEventDispatcher* dispatcher) 
+	
+	{
 		if (!*evns)
 			return kEvent_Continue;
 
@@ -297,8 +324,13 @@ public:
 		if (IsRidingHorse(p) || IsInKillmove(p))
 			return kEvent_Continue;
 
-		if (mm->numPauseGame > 0 || (im->unk118 & USER_EVENT_FLAG::kMovement) == 0 || (im->unk118 & USER_EVENT_FLAG::kLooking) == 0 || mm->IsMenuOpen(&dialogueMenu)
-			|| ((ActorState1*)((uintptr_t)p + 0xC0))->sitSleepState != SIT_SLEEP_STATE::kNormal || p->actorValueOwner.GetCurrent(26) <= 0) {
+		if (mm->numPauseGame > 0 || (im->unk118 & USER_EVENT_FLAG::kMovement) == 0 || (im->unk118 & USER_EVENT_FLAG::kLooking) == 0 || ((ActorState1*)((uintptr_t)p + 0xC0))->sitSleepState != SIT_SLEEP_STATE::kNormal || p->actorValueOwner.GetCurrent(26) <= 0) 
+		{
+			return kEvent_Continue;
+		}
+
+		if (mm->IsMenuOpen(&dialogueMenu) > false || mm->IsMenuOpen(&inventoryMenu) > false || mm->IsMenuOpen(&magicMenu) > false || mm->IsMenuOpen(&tweenMenu) > false || mm->IsMenuOpen(&barterMenu) > false || mm->IsMenuOpen(&giftMenu) > false || mm->IsMenuOpen(&lockpickingMenu) > false || mm->IsMenuOpen(&journalMenu) > false || mm->IsMenuOpen(&statsMenu) > false || mm->IsMenuOpen(&levelUpMenu) > false || mm->IsMenuOpen(&bookMenu) > false || mm->IsMenuOpen(&favoritesMenu) > false ||mm->IsMenuOpen(&modManagerMenu) > false || mm->IsMenuOpen(&sleepWaitMenu) > false || mm->IsMenuOpen(&containerMenu) > false ||mm->IsMenuOpen(&quantityMenu) > false)
+		{
 			return kEvent_Continue;
 		}
 
@@ -356,7 +388,7 @@ public:
 								else if (((wepL && wepR) || (!wepL && !wepR && !magicL && !magicR)) && (!onlyDuringAttacks || (onlyDuringAttacks && isAttacking))) {
 									DualWieldPowerAttack();
 								}
-								else if ((!onlyDuringAttacks && !magicL && !magicR) || (onlyDuringAttacks && isAttacking)) {
+								else if ((!onlyDuringAttacks && (!magicL || magicR)) || (onlyDuringAttacks && isAttacking)) {
 									RightHandPowerAttack();
 								}
 							}
